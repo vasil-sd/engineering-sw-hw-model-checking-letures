@@ -7,3 +7,5 @@
 2. https://youtu.be/sMTRU8ts4ZA
 
 3.1. https://youtu.be/AjtCH8pCU6s - небольшое введение в работу с Alloy Analyzer, модуль линейного порядка
+
+3.2 https://youtu.be/wP00Ts_UG_M - небольшой пример, как настраивать отображение моделей в Alloy Analyzer
