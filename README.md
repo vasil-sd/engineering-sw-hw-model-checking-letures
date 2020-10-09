@@ -8,4 +8,6 @@
 
 3.1. https://youtu.be/AjtCH8pCU6s - небольшое введение в работу с Alloy Analyzer, модуль линейного порядка
 
-3.2 https://youtu.be/wP00Ts_UG_M - небольшой пример, как настраивать отображение моделей в Alloy Analyzer
+3.2. https://youtu.be/wP00Ts_UG_M - небольшой пример, как настраивать отображение моделей в Alloy Analyzer
+
+3.3. https://youtu.be/COs4d7fsOfk - модуль size. Моделирование размеров блоков.
