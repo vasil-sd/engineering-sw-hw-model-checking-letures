@@ -10,4 +10,7 @@
 
 3.2. https://youtu.be/wP00Ts_UG_M - небольшой пример, как настраивать отображение моделей в Alloy Analyzer
 
-3.3. https://youtu.be/COs4d7fsOfk - модуль size. Моделирование размеров блоков.
+3.3. https://youtu.be/COs4d7fsOfk - Alloy модуль size. Моделирование размеров блоков.
+
+3.4. https://youtu.be/eoXQwIjTbvc - Alloy модуль address. Спецификация адресов блоков.
+
