@@ -14,3 +14,6 @@
 
 3.4. https://youtu.be/eoXQwIjTbvc - Alloy модуль address. Спецификация адресов блоков.
 
+3.5. https://youtu.be/DgMFm0UWwKI - Alloy модуль block. Спецификация на блоки памяти.
+
+
