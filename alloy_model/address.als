@@ -38,7 +38,6 @@ fun Sum[LHS: AddrSpace, RHS: Size] : AddrSpace { LHS.Add[RHS] }
 -- Distance возвращает размер/смещение между адресами
 fun Distance[Lower: AddrSpace, Upper: AddrSpace] : Size { Lower.Add.Upper }
 
-
 fact {
   -- если к адресу прибавляем нулевой размер/смещение получаем этот же адрес
   all a: AddrSpace | Sum[a, zero] = a
@@ -72,5 +71,8 @@ fact {
     less[Distance[a2,a3], Distance[a1,a3]]
   }
 }
+
+-- дополнительный предикат для удобства, проверяет, что в переданном множестве адресов нет 'null'
+pred not_null[A: set AddrSpace] {  null not in A }
 
 example: run {} for 7
