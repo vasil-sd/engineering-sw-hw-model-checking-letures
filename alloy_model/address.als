@@ -2,7 +2,7 @@ module address
 
 open size -- подключаем модуль size
 
-open order[Address] -- вводим линейный порядок над Address
+open order[Address] as o -- вводим линейный порядок над Address
 
 /*
 Небольшое пояснение про абстрактные сигнатуры.
@@ -30,6 +30,9 @@ abstract sig AddrSpace {
                          -- тернарное 'AddrSpace -> Size -> AddrSpace'
                          -- оно определяет результирующий адрес для суммы адреса и размера/смещения
 }
+
+one sig lowest in Address {} { lowest = o/first }
+one sig highest in Address {} { highest = o/last }
 
 -- Add : LHS:AddrSpace -> RHS:Size -> AddrSpace
 fun Sum[LHS: AddrSpace, RHS: Size] : AddrSpace { LHS.Add[RHS] }
