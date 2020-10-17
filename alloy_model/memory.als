@@ -1,18 +1,10 @@
 module memory[Time]
 
+open order[Time]
 open block[Time]
 
 open size
 open address
-
-fun NextBlockAddr[B: Block, T: Time] : AddrSpace { 
-  Sum[B.Addr.T, B.Size.T]
-}
-
-pred InBlock[A:Address, B:Block, T:Time] {
-  greater_or_equal[A, B.Addr.T]
-  less[A, B.NextBlockAddr[T]]
-}
 
 /*
   Тут определяются свойства блоков относительно положения в памяти.
@@ -71,14 +63,6 @@ fun Below[Babove: Block, T: Time] : set Block { Neighborhood.Below.T[Babove] }
 CheckNeighborhood: check {
   all t: Time | Neighborhood.Above.t = ~(Neighborhood.Below.t) 
 } for 6
-
--- этот предикат понадобится в определении опреции 'malloc'
--- когда большой пустой блок нужно разрезать на два
--- этот предикат определяет можно ли заданный блок разрезать в
--- заданный момент времени
-pred Splittable[B: Block, T: Time] {
-  some a: Address | a.InBlock[B, T] and a != B.Addr.T
-}
 
 /*
   Дальше начинаются предикаты основных свойств структуры памяти

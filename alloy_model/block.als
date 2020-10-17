@@ -52,6 +52,34 @@ fun InvisibleBlocks[T:Time]: set Block { BlockVisibility.Invisible.T }
 pred Visible[B: Block, T:Time] { B in T.VisibleBlocks }
 pred Invisible[B: Block, T:Time] { B in T.InvisibleBlocks }
 
+/*
+Функция получения первого адреса памяти, который следует сразу после блока
+*/
+fun NextBlockAddr[B: Block, T: Time] : AddrSpace { 
+  Sum[B.Addr.T, B.Size.T]
+}
+
+/*
+Предикат проверки того, что указанный адрес принадлежит блоку памяти
+*/
+pred InBlock[A:Address, B:Block, T:Time] {
+  greater_or_equal[A, B.Addr.T]
+  less[A, B.NextBlockAddr[T]]
+}
+
+-- этот предикат понадобится в определении опреции 'malloc'
+-- когда большой пустой блок нужно разрезать на два
+-- этот предикат определяет можно ли заданный блок разрезать в
+-- заданный момент времени
+pred Splittable[B: Block, T: Time] {
+  some a: Address
+  | some s1,s2 : s/Size - zero {
+    a.InBlock[B, T]
+    a != B.Addr.T
+    B.Size.T = Sum[s1,s2]
+  }
+}
+
 -- этот предикат - часть так называемых frame axioms
 -- говорит о том, что с предыдущего момента времени до 'Tnow'
 -- изменились только указанные блоки, остальные остались неизменны.
@@ -79,9 +107,13 @@ check1: check {
   all t: Time | no t.VisibleBlocks & t.InvisibleBlocks
 } for 7
 
--- тут посмотрим на то, как работает framing предикат:
--- между любыми двумя последовательными моментами времени
--- измениться может только (и ровно) один блок (мультипликтор one)
 example: run {
+  -- в каждый момент времени, есть по крайней мере один блок, который можно
+  -- разделить на два
+  all t: Time | some b: Block | b.Splittable[t]
+
+  -- тут посмотрим на то, как работает framing предикат:
+  -- между любыми двумя последовательными моментами времени
+  -- измениться может только (и ровно) один блок (мультипликтор one)
   all t: Time - first | one b : Block | t.BlocksAreTheSameExcept[b]
 } for 4 but exactly 5 Block -- блоков ровно 5 во всех моделях, остальные сигнатуры от 0 до 4 атомов
