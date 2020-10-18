@@ -84,11 +84,11 @@ pred Splittable[B: Block, T: Time] {
 -- говорит о том, что с предыдущего момента времени до 'Tnow'
 -- изменились только указанные блоки, остальные остались неизменны.
 -- подробнее о frame problem и способах решения см. https://en.wikipedia.org/wiki/Frame_problem
-pred BlocksAreTheSameExcept[Tnow: Time, Bs: set Block] {
-  let Tpast = Tnow.prev {
+pred BlocksAreTheSameExcept[now: Time, Bs: set Block] {
+  let past = now.prev {
     all B: Block - Bs {
-      B.Addr.Tnow = B.Addr.Tpast
-      B.Size.Tnow = B.Size.Tpast
+      B.Addr.now = B.Addr.past
+      B.Size.now = B.Size.past
     }
   }
 }

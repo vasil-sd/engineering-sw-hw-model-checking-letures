@@ -20,3 +20,4 @@
 
 3.7. https://youtu.be/t_ho_HMeym0 - Alloy модуль операции разделения блока.
 
+3.8. https://youtu.be/zf_oiDN63VY - Alloy модуль операции объединения блоков.

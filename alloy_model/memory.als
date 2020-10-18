@@ -64,6 +64,44 @@ CheckNeighborhood: check {
   all t: Time | Neighborhood.Above.t = ~(Neighborhood.Below.t) 
 } for 6
 
+-- получить все блоки над данным блоком в заданный момент времени
+fun AllAbove[Bbelow: Block, T: Time] : set Block {
+  ^(Neighborhood.Above.T)[Bbelow]
+}
+
+-- все блоки ниже данного в заданный момент времени
+fun AllBelow[Babove: Block, T:Time] : set Block {
+  ^(Neighborhood.Below.T)[Babove]
+}
+
+-- проверка того, что заданное множество блоков в заданный момент времени
+-- является непрерывной цепочкой соседних блоков
+pred Neighbors[T: Time, Bs: set Block] {
+  let all_paths_up = ^(Bs <: (Neighborhood.Above.T))
+  | let all_paths_down = ^(Bs <: (Neighborhood.Below.T)) {
+    all b: Bs {
+      one b.Above[T] or one b.Below[T]
+      b.all_paths_up in b.AllAbove[T]
+      b.all_paths_down in b.AllBelow[T]
+    }
+  }
+}
+
+-- Проверяем, что при валидной структуре памяти, все видимые блоки
+-- являются цепочкой соседей
+CheckNeighborsPred: check {
+  all t: Time | t.MemStructureValid implies t.Neighbors[t.VisibleBlocks]
+} for 7
+
+-- тут примеры цепочек соседей
+ExampleNeighbors: run {
+  all t: Time {
+    t.MemStructureValid
+    t.Neighbors[t.VisibleBlocks]
+    #t.VisibleBlocks > 2
+  }
+} for 6
+
 /*
   Дальше начинаются предикаты основных свойств структуры памяти
 */
@@ -81,8 +119,12 @@ pred NoHoles[Bs: set Block, T: Time] {
   highest[T] in Bs
   lowest[T] in Bs
   all b: Bs & middle[T] | one b.Above[T] and one b.Below[T]
-  one highest[T].Below[T]
-  one lowest[T].Above[T]
+  -- ниже два условия для учёта того, что один блок от начального адреса до
+  -- конечного тоже является валидной структурой памяти
+  (highest[T] != lowest[T] and one highest[T].Below[T] and one lowest[T].Above[T])
+  or
+  (highest[T] = lowest[T] and no highest[T].Below[T] and no lowest[T].Above[T])
+  -- можно было бы задать это так: #highest[T].Below[T] = #lowest[T].Above[T]
 }
 
 -- верхние границы блоков находятся внутри пула памяти,
@@ -114,3 +156,9 @@ example: run {
   -- хотим, чтобы в каждый момент времени видимых блоков было больше 3
   all t: Time | #t.VisibleBlocks > 3
 } for 7
+
+-- тут просмотр моделей для процесса отладки предиката 'NoHoles'
+-- подробнее см. видео
+DebugNoHoles: run {
+  all t: Time | #t.VisibleBlocks = 1 and t.MemStructureValid
+} for 6
