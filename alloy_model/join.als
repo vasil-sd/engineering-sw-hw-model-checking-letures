@@ -14,8 +14,9 @@ pred UpdateBlocks[now: Time, Bbelow, Babove: Block] {
     -- размер увеличивается на размер верхнего блока
     Bbelow.Size.now = Sum[Bbelow.Size.past, Babove.Size.past]
 
-    -- верхний блок уходит в нивидимые
+    -- верхний блок уходит в невидимые
     -- следующие два утвержения можно записать короче: 'Babove.Invisible[now]'
+    -- но такая запись понятнее
     Babove.Size.now = zero
     Babove.Addr.now = null
   }
@@ -41,7 +42,7 @@ pred JoinBlocks[now: Time, B1, B2: Block] {
 Example: run {
   all now: Time - first
   | let past = now.prev {
-    past.MemStructureValid -- это утверждение сильнее чем нужно, как показано в видео можно немного ослабить
+    past.MemStructureValid -- это утверждение сильнее чем нужно, как показано в видео, его можно немного ослабить
     some disj b1,b2: past.VisibleBlocks { -- для каких-то двух различных видимых блоков
       now.JoinBlocks[b1,b2] -- объединяем их в момент времени 'now'
       now.BlocksAreTheSameExcept[b1+b2] -- с 'past' до 'now' поменялись только 'b1' и 'b2' - рамочный предикат
@@ -75,4 +76,3 @@ CheckJoin: check JoinIsCorrectlyDefined for 7 but exactly 2 Time
 -- двух моментов времени должно быть достаточно, так как все предикаты связанные с динамическими операциями
 -- определены на двух моментах времени: текущем и предыдущем
 -- в видео показан процесс отладки предикатов и модели, когда находятся контр-примеры
-
