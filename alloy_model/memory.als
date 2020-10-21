@@ -144,6 +144,11 @@ pred MemStructureValid[T: Time] {
   }
 }
 
+pred SumOfBlockSizesIsConstant[now: Time] {
+  let past = now.prev
+  | past.VisibleBlocks.SizeOfAll[past] = now.VisibleBlocks.SizeOfAll[now]
+}
+
 -- смотрим результирующие модели структур памяти
 example: run {
   -- в каждый момент времени, есть по крайней мере один блок, который можно

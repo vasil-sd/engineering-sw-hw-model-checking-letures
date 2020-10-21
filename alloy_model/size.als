@@ -39,6 +39,29 @@ one sig max in Size {} {max = o/last}
 -- Для удобства определим функцию 'Sum', чтобы запись сложения была привычнее
 fun Sum[LHS, RHS: Size] : Size { LHS.Add[RHS] }
 
+fun SumAll[S : set Size] : one Size {
+  no S implies zero else
+  #S = 1 implies S else
+  #S = 2 implies S.Sum2 else
+  #S = 3 implies S.Sum3 else
+  #S = 4 implies S.Sum4 else
+  #S = 5 implies S.Sum5 else
+  #S = 6 implies S.Sum6 else
+  #S = 7 implies S.Sum7 else
+  #S = 8 implies S.Sum8 else
+  zero
+}
+
+fun Sum2[S : set Size] : one Size { Sum[S.minimum, S - S.minimum] }
+fun Sum3[S : set Size] : one Size { Sum[S.minimum, Sum2[S - S.minimum]] }
+fun Sum4[S : set Size] : one Size { Sum[S.minimum, Sum3[S - S.minimum]] }
+fun Sum5[S : set Size] : one Size { Sum[S.minimum, Sum4[S - S.minimum]] }
+fun Sum6[S : set Size] : one Size { Sum[S.minimum, Sum5[S - S.minimum]] }
+fun Sum7[S : set Size] : one Size { Sum[S.minimum, Sum6[S - S.minimum]] }
+fun Sum8[S : set Size] : one Size { Sum[S.minimum, Sum7[S - S.minimum]] }
+
+example_SumAll: run { some s1,s2,s3 : Size | SumAll[s1+s2] = s3 } for 7
+
 -- теперь свойства нашей операции/отношения
 -- по аналогии с математической операцией
 fact {

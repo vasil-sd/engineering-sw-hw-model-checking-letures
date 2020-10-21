@@ -66,8 +66,10 @@ assert JoinIsCorrectlyDefined {
           now.JoinBlocks[b1,b2] -- то мы можем их объединить в момент времени 'now'
           now.BlocksAreTheSameExcept[b1 + b2] -- меняются только объединяемые блоки в момент 'now'
        }
-       implies -- и это вседга должно приводить к
+       implies { -- и это вседга должно приводить к
          now.MemStructureValid -- валидной структуре памяти в момент 'now'
+         now.SumOfBlockSizesIsConstant
+       }
     }
 }
 

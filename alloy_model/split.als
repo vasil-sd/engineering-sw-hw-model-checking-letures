@@ -79,12 +79,14 @@ assert SplitIsCorrectlyDefined {
         now.SplitBlock[B, Binvis] -- в момен времени 'now' разделяем блок 'B'
         now.BlocksAreTheSameExcept[B + Binvis] -- от 'past' до 'now' меняются только блоки 'B' и 'Binvis'
       }
-      implies -- это влечёт
+      implies { -- это влечёт
         now.MemStructureValid -- валидность памяти в момент времени 'now'
+        now.SumOfBlockSizesIsConstant
+      }
 }
 
 -- Проверяем корректность определения операции
-CheckSplit: check SplitIsCorrectlyDefined for 9 but exactly 3 Time
+CheckSplit: check SplitIsCorrectlyDefined for 7 but exactly 2 Time, 4 Block
 -- контрпримеров не найдено на всех моделях где в сигнатурах до 9 атомов включительно и ровно по 3 момента времени
 -- в целом, такая область поиска контрпримеров даже немного избыточна (как примерно определять
 -- достаточность размеров моделей я вкратце рассказываю в видеоролике),

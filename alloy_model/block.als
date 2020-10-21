@@ -32,6 +32,42 @@ sig Block {
   | (Addr.t = null and Size.t = zero) or (not_null[Addr.t] and non_zero[Size.t])
 }
 
+fun lowest_block[Bs: set Block, t: Time] : set Block {
+  { b: Bs | b.Addr.t = minimum[Bs.Addr.t]}
+}
+
+fun but_lowest[Bs: set Block, t: Time] : set Block {
+  Bs - Bs.lowest_block[t]
+}
+
+fun SizeOfAll[Bs : set Block, t: Time] : one Size {
+  no Bs implies zero else
+  #Bs = 1 implies Bs.Size.t else
+  #Bs = 2 implies Bs.Size2[t] else 
+  #Bs = 3 implies Bs.Size3[t] else 
+  #Bs = 4 implies Bs.Size4[t] else 
+  #Bs = 5 implies Bs.Size5[t] else 
+  #Bs = 6 implies Bs.Size6[t] else 
+  #Bs = 7 implies Bs.Size7[t] else 
+  #Bs = 8 implies Bs.Size8[t] else
+  zero
+}
+
+fun Size2[Bs: set Block, t: Time] : one Size {
+  Sum[(Bs.lowest_block[t]).Size.t, (Bs.but_lowest[t]).Size.t]
+}
+
+fun Size3[Bs: set Block, t: Time] : one Size { Sum[(Bs.lowest_block[t]).Size.t, Size2[Bs.but_lowest[t], t]] }
+fun Size4[Bs: set Block, t: Time] : one Size { Sum[(Bs.lowest_block[t]).Size.t, Size3[Bs.but_lowest[t], t]] }
+fun Size5[Bs: set Block, t: Time] : one Size { Sum[(Bs.lowest_block[t]).Size.t, Size4[Bs.but_lowest[t], t]] }
+fun Size6[Bs: set Block, t: Time] : one Size { Sum[(Bs.lowest_block[t]).Size.t, Size5[Bs.but_lowest[t], t]] }
+fun Size7[Bs: set Block, t: Time] : one Size { Sum[(Bs.lowest_block[t]).Size.t, Size6[Bs.but_lowest[t], t]] }
+fun Size8[Bs: set Block, t: Time] : one Size { Sum[(Bs.lowest_block[t]).Size.t, Size7[Bs.but_lowest[t], t]] }
+
+Example_SizeOfAll: run {
+  all t: Time | #t.VisibleBlocks > 2 and some s: s/Size | s = SizeOfAll[t.VisibleBlocks, t] 
+} for 6 but 3 Block
+
 /*
 Тут вводится концепция видимости блоков, подробное объяснение этого есть в видео.
 Блок видимый только тогда, когда его адрес не 'null' и размер не 'zero'.
