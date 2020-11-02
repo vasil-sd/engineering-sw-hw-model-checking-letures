@@ -11,7 +11,7 @@
 
 Основные моменты:
 1. Не поддерживает копирование (не возможно создать два элемента с одинаковыми указателями prev/next)
-2. При перемещении разлинковывает старый элемент
+2. Не поддерживает перемещение
 3. При удалении отлинковывается из списка
 
 Это всё позволяет сделать работу со списками чуть более безошибочной.
@@ -22,19 +22,34 @@ class DlElt {
 public:
     DlElt() = default;
     DlElt(const DlElt&) = delete;
-    virtual ~DlElt() { Unlink(); }
-    DlElt(DlElt&& elt) {
-        prev_ = elt.prev_;
-        next_ = elt.next_;
-        elt.prev_ = elt.next_ = nullptr;
-    }
+    DlElt(DlElt&& elt) = delete;
     DlElt& operator=(const DlElt&) = delete;
-    DlElt& operator=(DlElt&& elt) {
+    DlElt& operator=(DlElt&& elt) = delete;
+    virtual ~DlElt() { Unlink(); }
+
+    template <typename Chain>
+    void Replace(Chain chain, size_t num = 1) {
+        T* prev = prev_;
+        T* next = next_;
+        while(--num > 0 && next != nullptr) {
+            T* new_next = next->DlElt<T>::HasNext() ? &next->DlElt<T>::next() : nullptr;
+            next->DlElt<T>::Unlink();
+            next = new_next;
+        };
         Unlink();
-        prev_ = elt.prev_;
-        next_ = elt.next_;
-        elt.prev_ = elt.next_ = nullptr;
+        T& c = chain();
+        T& start = c.DlElt::start();
+        T& end = c.DlElt::end();
+        if (prev != nullptr) {
+            prev->DlElt<T>::next_ = &start;
+            start.DlElt<T>::prev_ = prev;
+        }
+        if (next != nullptr) {
+            next->DlElt<T>::prev_ = &end;
+            end.DlElt<T>::next_ = next;
+        }
     }
+
     void Unlink() {
         if (prev_ != nullptr) { prev_->DlElt<T>::next_ = next_; }
         if (next_ != nullptr) { next_->DlElt<T>::prev_ = prev_; }

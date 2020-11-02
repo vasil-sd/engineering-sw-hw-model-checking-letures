@@ -22,19 +22,14 @@ public:
         , size_{static_cast<size_t>(reinterpret_cast<uintptr_t>(highest_addr) - reinterpret_cast<uintptr_t>(lowest_addr))}
         , free_size_{size_}
         , occupied_size_{0}
-        , lowest_{&Block::MakeAtAddress(aspace_.lowest(), size_)}
-        , highest_{lowest_}
-    {}
+    {
+        Block::MakeAtAddress(aspace_.lowest(), size_);
+    }
 
     bool NoOverlappingAndNoHoles() const {
-        bool result = !lowest_->HasPrev() && !highest_->HasNext()
-                      && ((!lowest_->HasNext() && !highest_->HasPrev())
-                          || (lowest_->HasNext() && highest_->HasPrev() && lowest_ != highest_));
-        if (!result) {
-            return false;
-        }
+        bool result = true;
         const Block* prev = nullptr;
-        lowest_->ForAll([&prev, &result](const Block& b){
+        ForAllBlocks([&prev, &result](const Block& b){
             if (prev != nullptr) {
                 result = (prev->NextBlockAddress() == b.GetAddress());
             } else {
@@ -48,27 +43,26 @@ public:
 
     bool NoOverruns() const {
         bool result;
-        lowest_->ForAll([&result, this](const Block& b){
-            return result = (b.NextBlockAddress() <= aspace_.highest());
+        ForAllBlocks([&result, highest_addr=aspace_.highest()](const Block& b){
+            return result = (b.NextBlockAddress() <= highest_addr);
         });
         return result;
     }
 
     bool SumOfBlockSizesIsConstant() const {
-        return size_ == lowest_->SizeOfAll()
-               && size_ == free_size_ + occupied_size_;
+        return size_ == SizeOfAllBlocks() && size_ == free_size_ + occupied_size_;
     }
 
     bool MemStructureValid() const {
-        return NoOverlappingAndNoHoles() &&
-               NoOverruns() &&
-               SumOfBlockSizesIsConstant();
+        return NoOverlappingAndNoHoles()
+               && NoOverruns()
+               && SumOfBlockSizesIsConstant();
     }
 
     Block& FindSuitableForAllocation(Size sz) {
         // sz is aligned and adjusted by block header size
         Block* blk = nullptr;
-        lowest_->ForAll([&blk, sz](Block& b){
+        ForAllBlocks([&blk, sz](Block& b){
             if (b.IsFree() && b.GetSize() >= sz) {
                 if (blk == nullptr || blk->GetSize() > b.GetSize()) {
                     blk = &b;
@@ -81,91 +75,56 @@ public:
         return *blk;
     }
 
-    std::tuple<Block&, Block&> Split(Block& b, Size sz) {
+    Block& Split(Block& b, Size sz) { // split block and return first block of pair
 
         assert(MemStructureValid());
         assert(b.Splittable());
 
         // sz is aligned and adjusted by block header size
-        assert(sz > Size{Block::BlockHeaderSize});
+        assert(sz > Block::HeaderSize);
 
-        Block* prev = b.HasPrev() ? &b.prev() : nullptr;
-        Block* next = b.HasNext() ? &b.next() : nullptr;
+        Size old_sz = b.GetSize();
+        Address old_addr = b.GetAddress();
 
-        bool set_lowest = (b == *lowest_);
-        bool set_highest = (b == *highest_);
-
-        Size old_sz = b;
-        Address old_addr = b;
-
-        Block::RemoveBlock(b);
-        Block& b1{Block::MakeAtAddress(old_addr, sz)};
-        Block& b2{Block::MakeAtAddress(b1.NextBlockAddress(), old_sz - sz)};
-        if (prev != nullptr) {
-            b1.InsertAbove(*prev);
+        b.Replace([&old_sz, &old_addr, &sz] () -> Block& {
+            Block& b1{Block::MakeAtAddress(old_addr, sz)};
+            Block& b2{Block::MakeAtAddress(b1.NextBlockAddress(), old_sz - sz)};
             b2.InsertAbove(b1);
-        } else if (next != nullptr) {
-            b2.InsertBelow(*next);
-            b1.InsertBelow(b2);
-        } else {
-            b2.InsertAbove(b1);
-        }
-        if (set_lowest) { lowest_ = &b1; }
-        if (set_highest) { highest_ = &b2; }
+            return b1;
+        });
 
         assert(MemStructureValid());
 
-        return {b1, b2};
+        return Block::AtAddress(old_addr);
     }
 
-    Block& Join(Block& b1, Block& b2) {
-        assert(b1.Above(b2) || b1.Below(b2));
+    Block& Join(Block& b) {
+        assert(b.HasNext());
         assert(MemStructureValid());
 
-        Size sz = b1.GetSize() + b2;
+        Size sz = b.GetSize() + b.next().GetSize();
+        Address addr = b.GetAddress();
 
-        Block* new_block = nullptr;
-
-        bool set_lowest = false;
-        bool set_highest = false;
-
-        if (b1.Above(b2)) {
-            set_lowest = b1 == *lowest_;
-            set_highest = b2 == *highest_;
-            Block::RemoveBlock(b1);
-            new_block = &Block::MakeAtAddress(b1, sz);
-            new_block->InsertBelow(b2);
-            Block::RemoveBlock(b2);
-        } else {
-            set_lowest = b2 == *lowest_;
-            set_highest = b1 == *highest_;
-            Block::RemoveBlock(b2);
-            new_block = &Block::MakeAtAddress(b2, sz);
-            new_block->InsertBelow(b1);
-            Block::RemoveBlock(b1);
-        }
-
-        if (set_lowest) { lowest_ = new_block; }
-        if (set_highest) { highest_ = new_block; }
+        b.Replace([&addr, sz]()->Block&{ return Block::MakeAtAddress(addr, sz);}, 2);
 
         assert(MemStructureValid());
 
-        return *new_block;
+        return Block::AtAddress(addr);
     }
 
     void* alloc(size_t sz) {
-        const Size hdr_size{Block::BlockHeaderSize};
-        const Size size = (hdr_size + Size{sz}).Align();
+        const Size size = (Block::HeaderSize + Size{sz}).Align();
         Block& block = FindSuitableForAllocation(size);
+
+        assert(block.IsFree());
 
         free_size_ = free_size_ - size;
         occupied_size_ = occupied_size_ + size;
 
-        if (block.GetSize() > size + hdr_size) {
-            auto result = Split(block, size);
-            auto& [b1, b2] = result;
-            b1.SetOccupied(true);
-            return b1.ToUserData();
+        if (block.GetSize() > size + Block::HeaderSize) {
+            Block& b = Split(block, size);
+            b.SetOccupied(true);
+            return b.ToUserData();
         } else {
             block.SetOccupied(true);
             return block.ToUserData();
@@ -176,7 +135,7 @@ public:
         // check that address is in some block
         Block* blk_ptr = nullptr;
         Address addr = aspace_.address(ptr);
-        lowest_->ForAll([&blk_ptr,&addr](Block& b){
+        ForAllBlocks([&blk_ptr,&addr](Block& b){
             if (b.InBlock(addr)) {
                 blk_ptr = &b;
                 return false;
@@ -185,26 +144,23 @@ public:
         });
         assert(blk_ptr != nullptr);
 
-        {   // extra check that ptr is correct
-            Block& blk = Block::FromUserData(ptr);
-            assert(blk == *blk_ptr);
-        }
+        // extra check that ptr is correct
+        Block& blk = Block::FromUserData(ptr);
+        assert(blk == *blk_ptr);
 
         // check against double free
-        assert(!blk_ptr->IsFree());
+        assert(!blk.IsFree());
+        blk.SetOccupied(false);
 
-        blk_ptr->SetOccupied(false);
+        free_size_ = free_size_ + blk.GetSize();
+        occupied_size_ = occupied_size_ - blk.GetSize();
 
-        free_size_ = free_size_ + blk_ptr->GetSize();
-        occupied_size_ = occupied_size_ - blk_ptr->GetSize();
-
-        if (blk_ptr->HasPrev() && blk_ptr->prev().IsFree()) {
-            Block& prev = blk_ptr->prev();
-            blk_ptr = &Join(prev, *blk_ptr);
+        if (blk.HasNext() && blk.next().IsFree()) {
+            Join(blk);
         }
-        if (blk_ptr->HasNext() && blk_ptr->next().IsFree()) {
-            Block& next = blk_ptr->next();
-            Join(*blk_ptr, next);
+
+        if (blk.HasPrev() && blk.prev().IsFree()) {
+            Join(blk.prev());
         }
     }
 
@@ -217,30 +173,47 @@ public:
         return {*this};
     }
 
+    Block& FirstBlock() const {
+        return Block::AtAddress(aspace_.lowest());
+    }
+
+    template <typename F>
+    void ForAllBlocks(F&& f) const {
+        FirstBlock().ForAll(std::move(f));
+    }
+
+    Size SizeOfAllBlocks() const {
+        Size result{0};
+        ForAllBlocks([&result](const Block& b){
+            result = result + b.GetSize();
+            return true;
+        });
+        return result;
+    }
+
 private:
     const AddrSpace aspace_;
     const Size size_;
     Size free_size_;
     Size occupied_size_;
-    Block* lowest_ = nullptr;
-    Block* highest_ = nullptr;
 
     friend std::ostream& operator<<(std::ostream& os, const Memory& mem);
 };
 
 std::ostream& operator<<(std::ostream& os, const Memory& mem) {
-    std::cout << "=========== MEM DUMP ===========" << std::endl;
-    std::cout << "memory total size: " << mem.MemSize() << std::endl;
-    std::cout << "memory free size: " << mem.FreeSize() << std::endl;
-    std::cout << "memory occupied size: " << mem.OccupiedSize() << std::endl;
-    std::cout << "blocks:" << std::endl;
+    os << "=========== MEM DUMP ===========" << std::endl;
+    os << "memory total size: " << mem.MemSize() << std::endl;
+    os << "memory free size: " << mem.FreeSize() << std::endl;
+    os << "memory occupied size: " << mem.OccupiedSize() << std::endl;
+    os << "blocks:" << std::endl;
     int idx = 0;
-    mem.lowest_->ForAll([&idx](const Block& b){
-        std::cout << "  " << std::setw(4) << std::right << std::setfill(' ')
-                  << idx++ << ": " << b << std::endl;
+    mem.ForAllBlocks([&idx, &os](const Block& b){
+        os << "  " << std::setw(4) << std::right << std::setfill(' ')
+                   << idx++ << ": " << b << std::endl;
         return true;
     });
-    std::cout << "--------------------------------" << std::endl;
+    os << "--------------------------------" << std::endl;
+    return os;
 }
 
 template <typename T>

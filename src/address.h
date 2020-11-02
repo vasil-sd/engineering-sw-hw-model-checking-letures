@@ -30,16 +30,12 @@ public:
     public:
         ~Address() = default;
         Address(const Address&) = default;
-        Address(Address&& a) {
-            addr_ = a.addr_;
-        }
+        Address(Address&& a) = default;
         Address& operator=(const Address&) = default;
-        Address& operator=(Address&& a) {
-            addr_ = a.addr_;
-        }
-        bool IsNull() const {
-            return addr_ == nullptr;
-        }
+        Address& operator=(Address&& a) = default;
+
+        bool IsNull() const { return addr_ == nullptr; }
+
         Address operator+(const Size& s) const {
             if (IsNull()) {
                 return {*this};
@@ -49,24 +45,12 @@ public:
                 return a;
             }
         }
-        bool operator==(const Address& RHS) const {
-            return  addr_ == RHS.addr_;
-        }
-        bool operator!=(const Address& RHS) const {
-            return  addr_ != RHS.addr_;
-        }
-        bool operator>=(const Address& RHS) const {
-            return  addr_ >= RHS.addr_;
-        }
-        bool operator<=(const Address& RHS) const {
-            return  addr_ <= RHS.addr_;
-        }
-        bool operator>(const Address& RHS) const {
-            return  addr_ > RHS.addr_;
-        }
-        bool operator<(const Address& RHS) const {
-            return  addr_ < RHS.addr_;
-        }
+        bool operator==(const Address& RHS) const { return  addr_ == RHS.addr_; }
+        bool operator!=(const Address& RHS) const { return  addr_ != RHS.addr_; }
+        bool operator>=(const Address& RHS) const { return  addr_ >= RHS.addr_; }
+        bool operator<=(const Address& RHS) const { return  addr_ <= RHS.addr_; }
+        bool operator>(const Address& RHS) const { return  addr_ > RHS.addr_; }
+        bool operator<(const Address& RHS) const { return  addr_ < RHS.addr_; }
     private:
         Address() = default;
         const void* addr_ = nullptr;
@@ -75,9 +59,7 @@ public:
         friend std::ostream& operator<<(std::ostream& os, const Address& addr);
     };
 
-    Address null() const {
-        return {};
-    }
+    Address null() const { return {}; }
 
     Address address(void* addr) const {
         assert(addr>=lowest_);
@@ -85,35 +67,15 @@ public:
         return {addr};
     }
 
-    Address lowest() const {
-        return {lowest_};
-    }
-
-    Address highest() const {
-        return {highest_};
-    }
-
-    static Address Sum(const Address& LHS, const Size& RHS) {
-        return LHS + RHS;
-    }
-
-    static Size Distance(const Address& Lower, const Address& Upper) {
-        assert(not_null(Lower));
-        assert(not_null(Upper));
-        assert(Lower <= Upper);
-        auto lower = reinterpret_cast<uintptr_t>(Lower.addr_);
-        auto upper = reinterpret_cast<uintptr_t>(Upper.addr_);
-        return {static_cast<size_t>(upper - lower)};
-    }
-
-    static bool not_null(const Address& A) {
-        return !A.IsNull();
-    }
+    Address lowest() const { return {lowest_}; }
+    Address highest() const { return {highest_}; }
 
 private:
     const void* lowest_;
     const void* highest_;
 };
+
+bool not_null(const AddrSpace::Address& A) { return !A.IsNull(); }
 
 std::ostream& operator<<(std::ostream& os, const AddrSpace::Address& addr) {
     os << std::hex << addr.addr_;

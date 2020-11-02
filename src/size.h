@@ -6,6 +6,9 @@
 #include <iostream>
 #include <cassert>
 
+/*
+эта функция нужна для выравнивания адресов и размеров
+*/
 size_t constexpr align(size_t s, size_t alignment = 8) {
     assert((alignment & (alignment - 1)) == 0);
     --alignment;
@@ -28,15 +31,10 @@ public:
     Size operator-(const Size& s) const { assert(sz_ >= s.sz_); return {sz_ - s.sz_}; }
 
     bool operator==(const Size& s) const { return sz_ == s.sz_; }
-
     bool operator!=(const Size& s) const { return sz_ != s.sz_; }
-
     bool operator>(const Size& s) const { return sz_ > s.sz_; }
-
     bool operator>=(const Size& s) const { return sz_ >= s.sz_; }
-
     bool operator<(const Size& s) const { return sz_ < s.sz_; }
-
     bool operator<=(const Size& s) const { return sz_ >= s.sz_; }
 
     static const Size zero;
@@ -55,6 +53,7 @@ private:
 
     friend class AddrSpace;
     friend class Memory;
+    friend class Block;
     friend std::ostream& operator<<(std::ostream& os, const Size& sz);
 };
 
