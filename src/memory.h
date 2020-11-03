@@ -102,10 +102,10 @@ public:
         assert(b.HasNext());
         assert(MemStructureValid());
 
-        Size sz = b.GetSize() + b.next().GetSize();
+        Size sz = b.GetSize() + b.Next().GetSize();
         Address addr = b.GetAddress();
 
-        b.Replace([&addr, sz]()->Block&{ return Block::MakeAtAddress(addr, sz);}, 2);
+        b.ReplaceTill([&addr, sz]()->Block&{ return Block::MakeAtAddress(addr, sz);}, b.Next());
 
         assert(MemStructureValid());
 
@@ -155,12 +155,12 @@ public:
         free_size_ = free_size_ + blk.GetSize();
         occupied_size_ = occupied_size_ - blk.GetSize();
 
-        if (blk.HasNext() && blk.next().IsFree()) {
+        if (blk.HasNext() && blk.Next().IsFree()) {
             Join(blk);
         }
 
-        if (blk.HasPrev() && blk.prev().IsFree()) {
-            Join(blk.prev());
+        if (blk.HasPrev() && blk.Prev().IsFree()) {
+            Join(blk.Prev());
         }
     }
 
