@@ -1,4 +1,4 @@
-Обзорный курс по model-checking/model-finding, читаемый осенью 2020 для студентов 2-го курса МФТИ.
+﻿Обзорный курс по model-checking/model-finding, читаемый осенью 2020 для студентов 2-го курса МФТИ.
 
 
 Ссылки на видео (по номерам лекций):
@@ -21,8 +21,13 @@
 
 4. https://youtu.be/CKhG5zf4xZQ - Простой менеджер памяти на основе моделей Alloy. Пояснения к исходному коду на C++.
 
-  - 4.1. https://youtu.be/xLRhdWBb4Tc - TLA+/PlusCal спецификация аллокатора памяти. Проверка некоторый динамических свойств, проверка
-         отсутсвия фрагментации свободной памяти.
+
+5. Проверка динамических свойств аллокатора с помощью TLA+:
+
+  - 5.1. https://youtu.be/xLRhdWBb4Tc - TLA+/PlusCal спецификация аллокатора памяти. Проверка некоторых динамических свойств, проверка
+         отсутсвия фрагментации свободной памяти. Предварительное видео.
+  - 5.2. https://youtu.be/PmPsRABU-hs - лекция. Основы TLA+, PlusCal. Моделирование свойств "живости" (liveness)
+  - 5.3. https://youtu.be/DhMK-WFcRcA - дополнение к лекции 5.2 с ответом на вопрос в конце лекции про stuttering и liveness свойства.
 
 Общие ссылки про матлогику, model-checking и пр:
 ================================================
@@ -53,3 +58,30 @@
 4. https://alloy.readthedocs.io/en/latest/
 
    Справочник по Alloy от Hillel Wayne
+
+
+Ссылки для изучения TLA+/PlusCal:
+=================================
+
+1. Основная книга по TLA+ "Specifying Systems": https://lamport.azurewebsites.net/tla/book-02-08-08.pdf
+
+2. Видеокурс по TLA+: http://lamport.azurewebsites.net/video/videos.html
+
+3. Сайты Hillel Waine:
+
+  - Learn TLA+: https://learntla.com/introduction/
+  - Блог: https://www.hillelwayne.com/
+
+4. Руководства по PlusCal:
+
+  - https://lamport.azurewebsites.net/pubs/pluscal.pdf
+  - C-подобный синтаксис: https://lamport.azurewebsites.net/tla/c-manual.pdf
+  - Паскаль-подобный синтаксис: https://lamport.azurewebsites.net/tla/p-manual.pdf
+
+5. Проверка многопоточных алгоритмов с помощью PlusCal: https://lamport.azurewebsites.net/pubs/dcas.pdf
+
+6. Примеры спецификаций: https://github.com/tlaplus/Examples
+
+7. Список статей с примерами спецификаций: https://www.hillelwayne.com/list-of-tla-examples/
+
+8. Статьи Рона Преслера: https://pron.github.io/
