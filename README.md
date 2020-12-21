@@ -32,30 +32,39 @@
 Общие ссылки про матлогику, model-checking и пр:
 ================================================
 
-1. Лекции Юрия Глебовича Карпова, выложенные на канале Ирины Шошминой:
+1. Книга Карпова Юрия Глебовича "Model-checking. Верификация параллельных и распределённых программных систем.".
+   
+   К сожалению, в настоящий момент не издаётся. Но можно найти в интернете (ссылку не привожу по понятным причинам).
+
+2. Лекции Юрия Глебовича Карпова, выложенные на канале Ирины Шошминой:
    https://www.youtube.com/channel/UCF-q6CklFjA2jmqm-aJcU3w/videos?view=0&sort=da&flow=grid
 
-   Довольно неплохое изложение многих вещей, но весьма сжатое. Многое может быть непонятным без изучения
-   дополнительной литературы.
+   Довольно неплохое изложение многих вещей, с примерами и наглядным описанием алгоритмов. Возможно, что для младших курсов
+   знания логики высказываний будет недостаточно и придётся дополнительно изучить некоторые моменты для более полного понимания
+   материала лекций.
 
 
 Ссылки для изучения Alloy:
 ==========================
 
-1. https://homepage.divms.uiowa.edu/~tinelli/classes/181/Fall17/lectures.shtml
+1. Книга Daniel Jackson "Software Abstractions". Можно заказать на amazon: https://www.amazon.com/Software-Abstractions-Logic-Language-Analysis/dp/0262017156
+
+   Хорошее введение в язак Alloy и инструмент Alloy Analyzer. Много примеров и пояснений. Для понимания материала достаточно базового знакомства с матлогикой. 
+
+2. https://homepage.divms.uiowa.edu/~tinelli/classes/181/Fall17/lectures.shtml
 
    Тут есть хороший учебный материал по Alloy и реляционной логике с множествами.
 
-2. https://www.hillelwayne.com/tags/alloy/
+3. https://www.hillelwayne.com/tags/alloy/
 
    Блог Hillel Wayne, много интересных статей с примерами использования как Alloy, так и TLA+ и других
    инструментов.
 
-3. https://github.com/AlloyTools/models
+4. https://github.com/AlloyTools/models
 
    Много примеров промышленных моделей на Alloy.
 
-4. https://alloy.readthedocs.io/en/latest/
+5. https://alloy.readthedocs.io/en/latest/
 
    Справочник по Alloy от Hillel Wayne
 
