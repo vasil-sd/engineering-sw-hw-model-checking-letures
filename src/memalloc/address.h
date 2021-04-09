@@ -70,6 +70,14 @@ public:
     Address lowest() const { return {lowest_}; }
     Address highest() const { return {highest_}; }
 
+    bool IsInAddrSpace(void *ptr) const {
+        if (ptr == nullptr) {
+            return false;
+        }
+        Address address{ptr};
+        return address >= lowest_ && address <= highest_;
+    }
+
 private:
     const void* lowest_;
     const void* highest_;

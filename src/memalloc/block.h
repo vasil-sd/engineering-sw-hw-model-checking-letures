@@ -3,13 +3,14 @@
 #include "address.h"
 #include "size.h"
 #include "double_linked_list.h"
+#include "gc_info.h"
 
 #include <cstdint>
 #include <iostream>
 
 #include <new>
 
-class Block : public DlElt<Block> {
+class Block : public DlElt<Block>, public GcInfo {
 public:
     static const Size HeaderSize;
     using Address = AddrSpace::Address;
@@ -35,6 +36,10 @@ public:
 
     void* ToUserData() const {
         return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(this) + static_cast<size_t>(HeaderSize));
+    }
+
+    size_t GetUserDataSize() const {
+        return static_cast<size_t>(size_ - HeaderSize);
     }
 
     static Block& FromUserData(void *ptr) {
@@ -63,6 +68,9 @@ const Size Block::HeaderSize{align(sizeof(Block))};
 std::ostream& operator<<(std::ostream& os, const Block& b) {
     os << "Addr: " << b.GetAddress()
        << ", Size: " << b.GetSize()
-       << ", " << (b.IsFree() ? "Free" : "Occupied");
+       << ", " << (b.IsFree() ? "Free" : "Occupied")
+       << (b.root ? ", Root" : "")
+       << (b.marked ? ", Marked" : "")
+       << (b.to_be_checked ? ", ToBeChecked" : "");
     return os;
 }

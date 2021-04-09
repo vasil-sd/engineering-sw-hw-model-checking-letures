@@ -191,11 +191,31 @@ public:
         return result;
     }
 
+    bool IsInAddrSpace(void* addr) {
+        return aspace_.IsInAddrSpace(addr);
+    }
+
+    Block& GetBlockFromUserData(void* user_data_ptr){
+        const auto address = aspace_.address(user_data_ptr);
+        Block* blk_ptr = nullptr;
+        ForAllBlocks([&](Block& blk){
+            if (blk.InBlock(address)) {
+                blk_ptr = &blk;
+                return false;
+            }
+            return true;
+        });
+        assert(blk_ptr != nullptr);
+        return *blk_ptr;
+    }
+
 private:
     const AddrSpace aspace_;
     const Size size_;
     Size free_size_;
     Size occupied_size_;
+
+    friend class Gc;
 
     friend std::ostream& operator<<(std::ostream& os, const Memory& mem);
 };
