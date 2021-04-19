@@ -32,6 +32,7 @@
 6. https://youtu.be/XiqNwYT_hC4 - Введение в автоматическое управление памятью
 
 7. https://youtu.be/zmt6miCTNF8 - Модель GC на Electrum2 (расширение Alloy)
+8. https://youtu.be/bMFCQHasGDY - Реализация GC на C++
 
 Общие ссылки про матлогику, model-checking и пр:
 ================================================
